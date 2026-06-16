@@ -7,6 +7,17 @@ def fetch_project(config):
         res = requests.get(config['url'], params=config['params'], timeout=30)
         soup = BeautifulSoup(res.text, 'html.parser')
         
+        # 临时调试：打印页面标题和表格行数
+        print(f"页面标题: {soup.title.string if soup.title else '无'}")
+        tables = soup.select('table')
+        print(f"找到 {len(tables)} 个表格")
+        for i, table in enumerate(tables):
+            rows = table.select('tr')
+            print(f"表格{i}: {len(rows)} 行")
+            for row in rows[:3]:  # 只打印前3行
+                cells = [td.get_text(strip=True) for td in row.select('td,th')]
+                print(f"  {cells}")
+        
         offset = config.get('timezone_offset', 0)
         tz = timezone(timedelta(hours=offset))
         now = datetime.now(tz).strftime('%Y-%m-%d %H:%M')
@@ -22,6 +33,8 @@ def fetch_project(config):
         return rows
     except Exception as e:
         print(f"❌ {config['name']} 抓取失败: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
 def save(project_name, rows):
