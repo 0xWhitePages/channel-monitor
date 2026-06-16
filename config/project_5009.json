@@ -1,0 +1,11 @@
+{
+  "name": "project_5009",
+  "url": "http://16.163.114.99:8990/reportxiaozhu.php",
+  "timezone_offset": 7,
+  "params": {
+    "id": "16",
+    "token": "da618e4b1bdd9569a67f920865538901",
+    "channels": "500931-TT-PWA-10\r\n500931-TT-PWA-09\r\n500931-TT-PWA-08\r\n500931-TT-PWA-07\r\n500931-TT-PWA-06\r\n500931-TT-PWA-05\r\n500931-TT-PWA-04\r\n500931-TT-PWA-03\r\n500931-TT-PWA-02\r\n500931-TT-PWA-01",
+    "timezone": "Etc/GMT-7"
+  }
+}
