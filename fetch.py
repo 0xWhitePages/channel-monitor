@@ -36,7 +36,6 @@ def save(project_name, rows):
     print(f"已保存到 {filepath}")
 
 if __name__ == '__main__':
-    # 去掉 wait_for_half_hour，GitHub Actions 用 cron 对齐
     configs = sorted(glob.glob('config/*.json'))
     if not configs:
         print("❌ 没有找到配置文件")
