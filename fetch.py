@@ -4,19 +4,18 @@ from datetime import datetime, timezone, timedelta
 
 def fetch_project(config):
     try:
-        res = requests.get(config['url'], params=config['params'], timeout=30)
+        # 直接用原始URL方式请求
+        base_url = config['url']
+        p = config['params']
+        channels_encoded = p['channels'].replace('\n', '%0D%0A')
+        url = (f"{base_url}?id={p['id']}&token={p['token']}"
+               f"&channels={channels_encoded}&timezone={p['timezone']}")
+        
+        res = requests.get(url, timeout=30)
         soup = BeautifulSoup(res.text, 'html.parser')
         
-        # 临时调试：打印页面标题和表格行数
         print(f"页面标题: {soup.title.string if soup.title else '无'}")
-        tables = soup.select('table')
-        print(f"找到 {len(tables)} 个表格")
-        for i, table in enumerate(tables):
-            rows = table.select('tr')
-            print(f"表格{i}: {len(rows)} 行")
-            for row in rows[:3]:  # 只打印前3行
-                cells = [td.get_text(strip=True) for td in row.select('td,th')]
-                print(f"  {cells}")
+        print(f"找到 {len(soup.select('table'))} 个表格")
         
         offset = config.get('timezone_offset', 0)
         tz = timezone(timedelta(hours=offset))
