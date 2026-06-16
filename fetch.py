@@ -1,25 +1,12 @@
-import requests, csv, os, json, glob, time
+import requests, csv, os, json, glob
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone, timedelta
-
-def wait_for_half_hour():
-    now = datetime.utcnow()
-    minutes = now.minute
-    seconds = now.second
-    if minutes < 30:
-        wait_seconds = (30 - minutes) * 60 - seconds
-    else:
-        wait_seconds = (60 - minutes) * 60 - seconds
-    if wait_seconds > 10:
-        print(f"⏳ 等待 {wait_seconds} 秒，将在下一个整点/半点开始")
-        time.sleep(wait_seconds)
 
 def fetch_project(config):
     try:
         res = requests.get(config['url'], params=config['params'], timeout=30)
         soup = BeautifulSoup(res.text, 'html.parser')
         
-        # 转换为项目时区时间
         offset = config.get('timezone_offset', 0)
         tz = timezone(timedelta(hours=offset))
         now = datetime.now(tz).strftime('%Y-%m-%d %H:%M')
@@ -30,6 +17,8 @@ def fetch_project(config):
             cells = [td.get_text(strip=True) for td in tr.select('td,th')]
             if len(cells) == 4 and not cells[0].startswith('渠') and cells[0] not in ['合计', '']:
                 rows.append([now, tz_label, config['name']] + cells)
+        
+        print(f"抓到 {len(rows)} 条数据")
         return rows
     except Exception as e:
         print(f"❌ {config['name']} 抓取失败: {e}")
@@ -44,10 +33,10 @@ def save(project_name, rows):
         if not file_exists:
             writer.writerow(['时间', '时区', '项目', '渠道', '访问', '注册', '首充'])
         writer.writerows(rows)
+    print(f"已保存到 {filepath}")
 
 if __name__ == '__main__':
-    wait_for_half_hour()
-    
+    # 去掉 wait_for_half_hour，GitHub Actions 用 cron 对齐
     configs = sorted(glob.glob('config/*.json'))
     if not configs:
         print("❌ 没有找到配置文件")
@@ -61,3 +50,5 @@ if __name__ == '__main__':
         if rows:
             save(config['name'], rows)
             print(f"✅ {config['name']} 已保存 {len(rows)} 条")
+        else:
+            print(f"⚠️ {config['name']} 没有数据")
